@@ -1,0 +1,46 @@
+.tetris { position: absolute; inset: 0; display: flex; flex-direction: column; }
+.tetris-top { flex: 1; min-height: 0; display: flex; gap: 10px; padding: 8px; }
+.tetris-side {
+  width: 84px; flex: none; display: flex; flex-direction: column; gap: 10px;
+}
+.side-box {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 8px 6px; border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--panel);
+}
+.side-box.stats b { font: 700 18px/1 var(--mono); color: var(--ink); }
+.side-label { font: 400 11px/1 var(--mono); color: var(--ink-3); text-transform: uppercase; letter-spacing: .08em; }
+.mini { display: grid; gap: 2px; width: 52px; aspect-ratio: 4 / 2; align-content: center; justify-content: center; }
+.mini i { width: 12px; height: 12px; border-radius: 2px; }
+.mini i.blank { background: transparent; }
+.mini.empty { border: 1px dashed var(--line-2); border-radius: 4px; }
+.mini.dim { opacity: .35; }
+.k-I { background: #4fd3ff; }
+.k-O { background: #ffd75e; }
+.k-T { background: #c084fc; }
+.k-S { background: #6ee7a0; }
+.k-Z { background: #ff6b6b; }
+.k-J { background: #6b8cff; }
+.k-L { background: #ffa94d; }
+.tetris-area {
+  flex: 1; min-width: 0; min-height: 0; display: flex; align-items: center; justify-content: center;
+  touch-action: none; user-select: none; -webkit-user-select: none;
+}
+.tetris-canvas {
+  display: block; border: 2px solid rgba(124,196,255,.25); border-radius: 6px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.45);
+}
+.tetris-pad {
+  flex: none; display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; padding: 8px 8px 12px;
+}
+.tetris-pad button {
+  height: 52px; border-radius: var(--r-md); border: 1px solid var(--line-2);
+  background: var(--panel); color: var(--ink); cursor: pointer; touch-action: none;
+  display: flex; align-items: center; justify-content: center;
+}
+.tetris-pad button:active { background: var(--panel-2); border-color: var(--game-accent); }
+@media (max-width: 420px) {
+  .tetris-side { width: 68px; }
+  .mini { width: 44px; }
+  .mini i { width: 10px; height: 10px; }
+}
