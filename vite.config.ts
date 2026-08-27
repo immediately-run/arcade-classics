@@ -10,8 +10,13 @@ import { devFs } from '@immediately-run/dev-fs'
 // devFs() (@immediately-run/dev-fs) makes `import ... from 'fs'` work during
 // local `vite dev`, bridging the same async ZenFS surface immediately.run
 // provides to your real disk. It is dev-only and absent from production builds.
+//
+// __APP_DEV__ replaces `import.meta.env.DEV` (which the sandbox cannot parse):
+// src/lib/store.ts uses it to route persistence to ./devfs-playground under
+// `vite dev`. On immediately.run the global is undefined → host mounts.
 // https://vite.dev/config/
 export default defineConfig({
+  define: { __APP_DEV__: JSON.stringify(process.env.NODE_ENV !== 'production') },
   plugins: [
     devFs(),
     { enforce: 'pre', ...mdx() },
