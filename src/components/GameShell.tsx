@@ -36,12 +36,22 @@ function GameShell({ game, Game, onBack }: GameShellProps) {
   const best = Math.max(bests[game.id], score);
 
   const start = useCallback(() => setStatus('playing'), []);
+  // A run left mid-game (back / restart) still counts: the HUD already showed it
+  // as the best, so the cabinet must agree.
+  const flush = useCallback(() => {
+    if ((status === 'playing' || status === 'paused') && score > 0) void recordScore(game.id, score);
+  }, [status, score, recordScore, game.id]);
   const restart = useCallback(() => {
+    flush();
     setScore(0);
     setResult(null);
     setResetToken((t) => t + 1);
     setStatus('playing');
-  }, []);
+  }, [flush]);
+  const leave = useCallback(() => {
+    flush();
+    onBack();
+  }, [flush, onBack]);
   const togglePause = useCallback(() => {
     setStatus((s) => (s === 'playing' ? 'paused' : s === 'paused' ? 'playing' : s));
   }, []);
@@ -82,7 +92,7 @@ function GameShell({ game, Game, onBack }: GameShellProps) {
   return (
     <div className="game" data-game={game.id} style={style}>
       <header className="hud">
-        <button className="hud-btn" type="button" onClick={onBack} aria-label="Back to the cabinet">
+        <button className="hud-btn" type="button" onClick={leave} aria-label="Back to the cabinet">
           <Icon name="back" />
         </button>
         <h1 className="hud-title">{game.name}</h1>

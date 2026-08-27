@@ -21,8 +21,11 @@ export interface ArcadeState {
   ready: boolean;
   privateStore: Store | null;
   bests: Bests;
-  /** The signed-in login, or '' when unknown. */
+  /** The signed-in login, else the user's chosen display name, or '' when unknown. */
   login: string;
+  /** True when `login` came from the host (the name setting is then hidden). */
+  loginFromHost: boolean;
+  setDisplayName: (name: string) => Promise<void>;
   shared: Store | null;
   /** Name of a remembered space whose grant could not be re-opened silently
    *  (e.g. one created with `createSharedStore`, which records no durable
@@ -42,6 +45,8 @@ export const ArcadeContext = createContext<ArcadeState>({
   privateStore: null,
   bests: EMPTY_BESTS,
   login: '',
+  loginFromHost: false,
+  setDisplayName: async () => {},
   shared: null,
   sharedPending: null,
   sharedBusy: false,

@@ -200,6 +200,9 @@
 .rows .who { font: 600 14px/1.2 var(--sans); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rows .when { font: 400 12px/1 var(--mono); color: var(--ink-3); }
 .rows .pts { font: 700 15px/1 var(--mono); color: var(--accent-3); }
+.name-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.name-row .input { flex: 1; min-width: 0; max-width: 260px; font: 400 14px/1.2 var(--sans); color: var(--ink); background: var(--bg-2, transparent); border: 1px solid var(--line-2); border-radius: var(--r-md); padding: 8px 10px; }
+.name-row .input:focus { outline: none; border-color: var(--accent-3); }
 .panel-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; }
 
 @media (max-width: 480px) {

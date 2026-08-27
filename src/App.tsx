@@ -8,7 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '@immediately-run/sdk/auth';
 import { GAME_IDS, gameById, type GameId } from './data/games';
 import { ArcadeContext, EMPTY_BESTS, type ArcadeState, type Bests, type ScoreResult } from './lib/arcadeContext';
-import { readConfig, writeConfig } from './lib/config';
+import { readConfig, writeConfig, type ArcadeConfig } from './lib/config';
 import { bestOf, readScores, recordScore as persistScore, submitSharedScore } from './lib/scores';
 import {
   createSharedStore,
@@ -32,10 +32,22 @@ const GAME_COMPONENTS = { snake: Snake, tetris: Tetris, breakout: Breakout, '204
 function App() {
   const [screen, setScreen] = useState<Screen>('home');
   const auth = useAuth();
-  const login = auth.user?.login ?? '';
+  const hostLogin = auth.user?.login ?? '';
+  // Stage apps get no user from the host: fall back to a name the player picks.
+  const [displayName, setDisplayNameState] = useState('');
+  const login = hostLogin || displayName.trim();
 
   const [ready, setReady] = useState(false);
   const [privateStore, setPrivateStore] = useState<Store | null>(null);
+  // Last config written/read, so partial updates never drop the other keys.
+  const configRef = useRef<ArcadeConfig>({});
+  const saveConfig = useCallback(
+    async (patch: ArcadeConfig) => {
+      configRef.current = { ...configRef.current, ...patch };
+      if (privateStore) await writeConfig(privateStore, configRef.current);
+    },
+    [privateStore],
+  );
   const [bests, setBests] = useState<Bests>(EMPTY_BESTS);
   const bestsRef = useRef(bests);
   useEffect(() => {
@@ -72,6 +84,8 @@ function App() {
         });
         setPrivateStore(s);
         setBests(b);
+        configRef.current = cfg;
+        if (cfg.displayName) setDisplayNameState(cfg.displayName);
         if (cfg.sharedSpaceId) {
           const remembered = await openRememberedSpace(cfg.sharedSpaceId);
           if (cancelled) return;
@@ -121,9 +135,7 @@ function App() {
         const s = mode === 'pick' ? await pickSharedStore() : await createSharedStore('Arcade');
         setShared(s);
         setSharedPending(null);
-        if (privateStore && s.spaceId) {
-          await writeConfig(privateStore, { sharedSpaceId: s.spaceId, sharedName: s.name });
-        }
+        if (s.spaceId) await saveConfig({ sharedSpaceId: s.spaceId, sharedName: s.name });
       } catch (e) {
         const err = e as { code?: string; message?: string };
         if (err?.code !== 'cancelled') {
@@ -139,15 +151,23 @@ function App() {
         setSharedBusy(false);
       }
     },
-    [privateStore],
+    [saveConfig],
   );
 
   const forgetShared = useCallback(async () => {
     setShared(null);
     setSharedPending(null);
     setSharedError(null);
-    if (privateStore) await writeConfig(privateStore, {});
-  }, [privateStore]);
+    await saveConfig({ sharedSpaceId: undefined, sharedName: undefined });
+  }, [saveConfig]);
+
+  const setDisplayName = useCallback(
+    async (name: string) => {
+      setDisplayNameState(name);
+      await saveConfig({ displayName: name.trim() || undefined });
+    },
+    [saveConfig],
+  );
 
   const state = useMemo<ArcadeState>(
     () => ({
@@ -155,6 +175,8 @@ function App() {
       privateStore,
       bests,
       login,
+      loginFromHost: hostLogin !== '',
+      setDisplayName,
       shared,
       sharedPending,
       sharedBusy,
@@ -163,7 +185,21 @@ function App() {
       openShared,
       forgetShared,
     }),
-    [ready, privateStore, bests, login, shared, sharedPending, sharedBusy, sharedError, recordScore, openShared, forgetShared],
+    [
+      ready,
+      privateStore,
+      bests,
+      login,
+      hostLogin,
+      setDisplayName,
+      shared,
+      sharedPending,
+      sharedBusy,
+      sharedError,
+      recordScore,
+      openShared,
+      forgetShared,
+    ],
   );
 
   const goHome = useCallback(() => setScreen('home'), []);

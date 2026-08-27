@@ -5,6 +5,8 @@ import { readJson, writeJson, type Store } from './store';
 export interface ArcadeConfig {
   sharedSpaceId?: string;
   sharedName?: string;
+  /** Name shown on the shared leaderboard when the host reports no login. */
+  displayName?: string;
 }
 
 const configPath = (store: Store): string => `${store.root}/config.json`;

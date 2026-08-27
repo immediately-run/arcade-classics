@@ -13,8 +13,19 @@ interface LeaderboardProps {
 const POLL_MS = 4000;
 
 function Leaderboard({ onBack }: LeaderboardProps) {
-  const { privateStore, shared, sharedPending, sharedBusy, sharedError, openShared, forgetShared, login, bests } =
-    useArcade();
+  const {
+    privateStore,
+    shared,
+    sharedPending,
+    sharedBusy,
+    sharedError,
+    openShared,
+    forgetShared,
+    login,
+    loginFromHost,
+    setDisplayName,
+    bests,
+  } = useArcade();
   const [game, setGame] = useState<GameId>('snake');
   // Results are keyed by what they were loaded for, so switching tabs shows a
   // loading state without a synchronous setState in the effect.
@@ -132,6 +143,20 @@ function Leaderboard({ onBack }: LeaderboardProps) {
                     </li>
                   ))}
                 </ol>
+              )}
+              {!loginFromHost && (
+                <label className="name-row">
+                  <span className="muted">Your name</span>
+                  <input
+                    className="input"
+                    type="text"
+                    maxLength={32}
+                    placeholder="someone"
+                    defaultValue={login}
+                    onBlur={(e) => void setDisplayName(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+                  />
+                </label>
               )}
               <div className="panel-foot">
                 <span className="muted">Refreshes every {POLL_MS / 1000} s.</span>
