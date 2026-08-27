@@ -1,4 +1,12 @@
-# Working in this repo
+# Working in this repo — Arcade classics
+
+**Arcade classics** is an immediately.run example app: Snake, Tetris, Breakout
+and 2048 in one cabinet, with private top-10 scores in `<private>/scores/<game>.json`
+and an optional shared leaderboard where each player writes only
+`<shared>/scores/<game>/<login>.json` (see `src/lib/scores.ts`, `src/lib/store.ts`).
+Games implement the `GameProps` contract in `src/lib/gameTypes.ts`; `GameShell`
+owns the HUD and the ready/playing/paused/over state machine and remounts a game
+by key on restart. Keep game logic pure in `src/games/<game>Logic.ts`.
 
 This is an **immediately.run app**: React + TypeScript that loads from GitHub and
 transpiles in the browser (no server, no build step at runtime). Keep the rules

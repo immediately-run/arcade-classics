@@ -1,135 +1,80 @@
-# immediately.run — starter template
+# Arcade classics
 
-A ready-to-run starter for building apps on
-[immediately.run](https://immediately.run): React + TypeScript + Vite, wired to
-the brand design system, with the project layout immediately.run expects.
+Snake, Tetris, Breakout and 2048 in one cabinet — with high scores that live in
+your files and a shared leaderboard for friends. An example app for
+[immediately.run](https://immediately.run): React + TypeScript, no server, no
+build step at runtime, no external dependencies beyond React and the SDK.
 
-## Try it instantly
+## Try it
 
-Try this template on [immediately.run](https://immediately.run/present/github/immediately-run/new-project-template/main/files/src/App.tsx)
+Open it on immediately.run:
 
-> Using this as a starting point for your own app? After you push to your repo,
-> update the link above to
-> `https://immediately.run/present/github/<owner>/<repo>/<ref>/files/src/App.tsx`.
+<https://immediately.run/present/github/immediately-run/arcade-classics/main/files/src/App.tsx>
 
-## Use this template
+Works at phone sizes (375×667 and up, with swipe gestures and on-screen
+controls) and on the desktop (keyboard).
 
-1. Create a new repo from this template (or copy the files).
-2. `npm install`
-3. `npm run dev` and start editing `src/App.tsx`.
-4. Push to GitHub and open it on immediately.run with the link above.
+## The games
 
-## Fast loading on immediately.run (auto-cache)
+| Game | Controls | Notes |
+| --- | --- | --- |
+| **Snake** | Arrows / WASD, swipe, on-screen D-pad | 20×20 grid on a canvas, speed ramps with every meal, walls kill (no wrap-around). |
+| **Tetris** | ← → move, ↑ / X rotate, Z rotate back, ↓ soft drop, space hard drop, C / shift hold. Touch: tap rotates, drag left/right moves, drag down soft-drops, double-tap hard-drops, plus visible buttons. | 7-bag, SRS-style rotation with simple wall kicks, ghost piece, hold, next-3 preview, lock delay, 100/300/500/800 line scoring × level, gravity speeds up every 10 lines. |
+| **Breakout** | Paddle follows the pointer or your finger; ← → also work; tap / click / space launches | Bounce angle depends on where the ball hits the paddle, 3 lives, brick rows worth 70…20 points, four level layouts that loop with rising speed. |
+| **2048** | Arrows / WASD or swipe; U or backspace undoes | DOM tiles with CSS slide + merge animations, one undo per move, "keep going" after 2048. |
 
-immediately.run normally reads your sources from the GitHub API, which is slow
-and rate-limited for anonymous visitors. This template ships a GitHub Action
-([`.github/workflows/cache.yml`](./.github/workflows/cache.yml)) that, on every
-push to `main`, builds a pre-cached zip of your repo and publishes it to your
-repo's **own GitHub Pages**. immediately.run finds it automatically at
-`https://<owner>.github.io/<repo>/cached_repositories/main.zip` and loads from
-there — falling back to the API if it's missing.
+Every game runs in a `requestAnimationFrame` loop with delta time, pauses when
+the tab is hidden, and shares one HUD: score, personal best, pause, restart,
+back. Esc or P toggles pause.
 
-The cache also embeds a manifest sidecar, so visitors can push edits back to
-GitHub even when the app was loaded from the zip.
+## How data is stored
 
-### Enable the cache (one-time)
+Everything goes through the immediately.run filesystem (`fs`), via
+`src/lib/store.ts`:
 
-For a repo in your **own** GitHub account or org, there's a single one-time step:
+- **Private high scores** — `<private>/scores/<game>.json`, your top 10 runs
+  with dates, in this app's per-user settings folder. No prompts; this works
+  the moment the app loads.
+- **Shared leaderboard (optional)** — from the Leaderboard screen, pick an
+  existing space or create an "Arcade" space. Each player writes only
+  **their own** file, `<shared>/scores/<game>/<login>.json`, holding their best
+  for that game. Because nobody ever rewrites anyone else's file, last-write-wins
+  can't clobber a score. The leaderboard merges every file in the directory and
+  polls it every 4 s (shared spaces raise no remote watch events).
+- **`<private>/config.json`** remembers the chosen space so it re-opens at boot.
 
-1. **Settings → Pages → Build and deployment → Source: GitHub Actions.**
-2. Push to `main` (or re-run the **Cache for immediately.run** workflow from the
-   Actions tab).
+### Multi-user notes
 
-That's it — no tokens and no secrets to configure. The workflow builds the zip and
-publishes it to your repo's Pages; immediately.run finds it automatically on the
-next load. The first publish can lag a push by up to ~10 minutes of GitHub Pages
-CDN caching. If the app still loads from the API, check that the workflow run
-succeeded and that Pages shows a green **github-pages** deployment.
+- The app cannot invite people: share the space itself from immediately.run's
+  Spaces UI. Anyone with read access sees the board; write access is needed to
+  post a score.
+- Player identity is the GitHub login reported by the host (`useAuth`). When
+  the host reports none, scores post as "someone".
+- A space created from inside the app may need to be picked once more on the
+  next load (the host records no durable grant for created spaces yet); the app
+  says so and offers the picker.
 
-> **immediately-run org repos** skip even that step: the org's internal **deploy
-> GitHub App** self-provisions Pages on the first run (it holds Pages +
-> Administration write and its `DEPLOY_APP_ID` / `DEPLOY_APP_PRIVATE_KEY` are org
-> secrets). That App is org-internal — repos outside the org neither have nor need
-> it, and `cache.yml` automatically falls back to the manual step above.
-
-### Always run the newest commit
-
-By default the cached version is served even if it's a few minutes behind
-`main`. If your app must always reflect the very latest commit, add this to
-`package.json`:
-
-```jsonc
-{
-  "immediately.run": {
-    "requireLatest": true
-  }
-}
-```
-
-immediately.run still boots instantly from the cache, then checks in the
-background (one API request) whether the cache is current and, if not, reloads
-from GitHub.
-
-## How it's organized
-
-immediately.run renders the **default export of `src/App.tsx`** — that's the
-entry point, not `main.tsx`.
-
-```
-src/
-  main.tsx              # local vite dev/build entry only — immediately.run IGNORES this
-  App.tsx               # ROOT: default export + imports the global CSS
-  index.css             # fonts, design tokens (dark + light), resets
-  App.css               # layout + component styles
-  mdx.d.ts              # type shim so `import X from './x.mdx'` works
-  components/           # one default-exported React component per file
-  data/                 # typed data arrays (NO components/JSX here)
-  hooks/                # custom hooks (NO components here)
-  assets/               # images you import, e.g. import logo from './assets/logo.png'
-```
-
-The included page shows the core patterns: a data array mapped to cards
-(`data/features.ts` → `components/Features.tsx`), a custom hook
-(`hooks/useTheme.ts` → `components/ThemeSwitch.tsx`), and local React state
-(`components/Counter.tsx`).
-
-## Filesystem access (`fs`)
-
-immediately.run apps can read and write a filesystem by importing `fs` (async
-only — `fs.promises.*` and callback style). This template has local-dev support
-for it built in via [`@immediately-run/dev-fs`](https://github.com/immediately-run/dev-fs),
-a Vite plugin (already wired into `vite.config.ts`) that bridges the same
-filesystem to your real local disk during `vite dev`. See that repo for the
-supported API and details.
-
-```ts
-import fs from 'fs'
-
-await fs.promises.writeFile('/data/notes.txt', 'hello', 'utf8')
-const text = await fs.promises.readFile('/data/notes.txt', 'utf8')
-```
-
-`main.tsx` runs a one-off round-trip smoke test in dev — check the browser
-console for the `[dev-fs]` group, and delete it freely.
-
-## The rules that keep it working on immediately.run
-
-See [`CLAUDE.md`](./CLAUDE.md) for the full list. The essentials:
-
-- **Global CSS is imported from `App.tsx`, never only from `main.tsx`.**
-- **A file that exports a component exports *only* components** — data, consts,
-  and helpers go in `data/`, `hooks/`, or `lib/`. `npm run lint` enforces this.
-- **Pull colors, fonts, radii, and shadows from the tokens in `index.css`**
-  rather than hard-coding values.
-
-## Develop
-
-Requires Node.js 20.19+ or 22.12+.
+## Local development
 
 ```bash
 npm install
-npm run dev      # local dev server
-npm run build    # tsc -b && vite build — must pass with no type errors
-npm run lint     # eslint — enforces the React Fast Refresh / HMR rule
-npm run preview  # serve the production build
+npm run dev      # vite; persistence goes to ./devfs-playground (git-ignored)
+npm run build    # tsc + vite build
+npm run lint     # includes the React Fast Refresh rule immediately.run relies on
 ```
+
+Under `vite dev` there is no host, so the private store and the "shared" store
+are both local folders and `useAuth` reports no user.
+
+## Layout
+
+```
+src/App.tsx              entry — boots the stores, routes cabinet / game / leaderboard
+src/components/          Cabinet, GameCard, GameShell (HUD + state machine), Leaderboard, DPad, Icon, ThemeSwitch
+src/games/               one <Game>.tsx + pure <game>Logic.ts + .css per game
+src/lib/store.ts         private / shared store over the immediately.run fs
+src/lib/scores.ts        top-10 files and the one-file-per-player shared layout
+src/hooks/               rAF loop, gestures, keys, element size, touch detection
+```
+
+MIT — see `LICENSE`.
