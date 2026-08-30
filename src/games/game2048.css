@@ -8,11 +8,33 @@
   flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center;
   touch-action: none; user-select: none; -webkit-user-select: none; padding: 4px;
 }
+/* Square board that spins: give the turning square room, keep it centred. */
+.g2048-wrap { position: relative; }
 .g2048-board {
   position: relative; display: grid; grid-template-columns: repeat(4, var(--cell));
   grid-auto-rows: var(--cell); gap: var(--gap); padding: var(--gap);
   background: #2b2418; border-radius: 10px;
   box-shadow: 0 18px 50px rgba(0,0,0,.45), inset 0 0 0 1px rgba(244,194,106,.15);
+  will-change: transform;
+}
+/* Chaos twist: the tile grid has already quarter-turned; the element starts at
+   the counter-rotation and eases upright, so the board reads as turning. */
+.g2048-board.twisting { animation: twist-spin .4s cubic-bezier(.32, .72, 0, 1) both; }
+.g2048-board.twist-cw { --twist-from: -90deg; }
+.g2048-board.twist-ccw { --twist-from: 90deg; }
+@keyframes twist-spin {
+  from { transform: rotate(var(--twist-from)) scale(1); }
+  55% { scale: .9; }
+  to { transform: rotate(0deg) scale(1); }
+}
+/* Tiles sit at their rotated coordinates already; a slide transition here
+   would fight the board spin — the start frame is identical to the old board,
+   so the instant jump is invisible. */
+.g2048-board.twisting .tile { transition: none; }
+/* Reduced motion → still a real twist in the data, but nothing moves. */
+@media (prefers-reduced-motion: reduce) {
+  .g2048-board { will-change: auto; }
+  .g2048-board.twisting { animation: none; transform: none !important; }
 }
 .g2048-slot { background: rgba(255,240,210,.07); border-radius: 6px; }
 .tile {
@@ -42,4 +64,22 @@
   position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; gap: 12px;
   align-items: center; justify-content: center; border-radius: 10px;
   background: rgba(43,36,24,.86); color: #fff3d6; font: 800 26px/1 var(--disp);
+}
+/* Chaos-twist badge: floats over the board while it turns. */
+.g2048-twist {
+  position: absolute; left: 50%; top: 50%; z-index: 6; translate: -50% -50%;
+  display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: var(--r-pill);
+  background: rgba(10,11,17,.82); border: 1px solid var(--line-2); color: var(--ink);
+  font: 700 13px/1 var(--mono); letter-spacing: .02em; white-space: nowrap;
+  animation: twist-badge .44s ease-out both;
+}
+.g2048-twist svg { color: var(--accent-pink); }
+@keyframes twist-badge {
+  0% { opacity: 0; scale: .8; }
+  25% { opacity: 1; scale: 1; }
+  75% { opacity: 1; }
+  100% { opacity: 0; scale: 1.04; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .g2048-twist { animation: none; }
 }

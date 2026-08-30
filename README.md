@@ -21,7 +21,7 @@ controls) and on the desktop (keyboard).
 | **Snake** | Arrows / WASD, swipe, on-screen D-pad | 20×20 grid on a canvas, speed ramps with every meal, walls kill (no wrap-around). |
 | **Tetris** | ← → move, ↑ / X rotate, Z rotate back, ↓ soft drop, space hard drop, C / shift hold. Touch: tap rotates, drag left/right moves, drag down soft-drops, double-tap hard-drops, plus visible buttons. | 7-bag, SRS-style rotation with simple wall kicks, ghost piece, hold, next-3 preview, lock delay, 100/300/500/800 line scoring × level, gravity speeds up every 10 lines. |
 | **Breakout** | Paddle follows the pointer or your finger; ← → also work; tap / click / space launches | Bounce angle depends on where the ball hits the paddle, 3 lives, brick rows worth 70…20 points, four level layouts that loop with rising speed. |
-| **2048** | Arrows / WASD or swipe; U or backspace undoes | DOM tiles with CSS slide + merge animations, one undo per move, "keep going" after 2048. |
+| **2048** | Arrows / WASD or swipe; U or backspace undoes | DOM tiles with CSS slide + merge animations, one undo per move, "keep going" after 2048. **Chaos twist:** after a move settles, the board may quarter-turn left or right (odds ramp from 35% to 65% over the first ~17 moves) — a real rotation of the tile data, animated as a spin that lands upright, with input locked for the duration. |
 
 Every game runs in a `requestAnimationFrame` loop with delta time, pauses when
 the tab is hidden, and shares one HUD: score, personal best, pause, restart,
