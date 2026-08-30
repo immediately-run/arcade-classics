@@ -41,8 +41,8 @@ export const GAMES: GameMeta[] = [
   {
     id: '2048',
     name: '2048',
-    tagline: 'Slide, merge, reach the tile. One undo when it goes wrong.',
-    controls: 'Arrows / WASD or swipe',
+    tagline: 'Slide, merge, reach the tile. The board twists without warning.',
+    controls: 'Arrows / WASD or swipe; U or backspace undoes. The board quarter-turns at random after a move — trust nothing',
     accent: '#f4c26a',
     board: '#2b2418',
   },

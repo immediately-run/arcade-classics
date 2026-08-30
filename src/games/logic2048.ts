@@ -59,6 +59,20 @@ export function settle(s: State2048): State2048 {
   };
 }
 
+/** Which way the chaos twist turns: clockwise (to the right) or not. */
+export type SpinDir = 'cw' | 'ccw';
+
+/** Quarter-turn the whole board. A rotation is an automorphism of the grid —
+ *  adjacencies and corners survive, so the structure is as good as it was; only
+ *  the player's mental map of "which key does what" is destroyed. Tile ids are
+ *  kept so the DOM keeps animating the same nodes. Call this on a settled
+ *  state (no dying/spawn flags). */
+export function rotateBoard(prev: State2048, dir: SpinDir): State2048 {
+  const turn = (t: Tile): Tile =>
+    dir === 'cw' ? { ...t, r: t.c, c: SIZE - 1 - t.r } : { ...t, r: SIZE - 1 - t.c, c: t.r };
+  return { ...prev, tiles: prev.tiles.map(turn) };
+}
+
 const canMove = (tiles: Tile[]): boolean => {
   const grid: (number | null)[][] = Array.from({ length: SIZE }, () => Array<number | null>(SIZE).fill(null));
   for (const t of tiles) grid[t.r][t.c] = t.value;
