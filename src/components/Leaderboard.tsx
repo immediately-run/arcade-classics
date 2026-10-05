@@ -10,7 +10,6 @@ interface LeaderboardProps {
   onBack: () => void;
 }
 
-const POLL_MS = 4000;
 
 function Leaderboard({ onBack }: LeaderboardProps) {
   const {
@@ -48,8 +47,8 @@ function Leaderboard({ onBack }: LeaderboardProps) {
     };
   }, [privateStore, game, mineKey]);
 
-  // Shared rows: read now, then poll the game's directory (other players' writes
-  // never raise watch events, so polling is the live-update mechanism).
+  // Shared rows: read now, then WATCH the game's directory (R3-901 — the relay
+  // surfaces other players' writes as watch events).
   useEffect(() => {
     if (!shared) return;
     let cancelled = false;
@@ -160,7 +159,7 @@ function Leaderboard({ onBack }: LeaderboardProps) {
                 </label>
               )}
               <div className="panel-foot">
-                <span className="muted">Refreshes every {POLL_MS / 1000} s.</span>
+                <span className="muted">Live — updates the moment another player scores.</span>
                 <button className="btn btn-ghost small" type="button" onClick={() => void forgetShared()}>
                   Disconnect
                 </button>
