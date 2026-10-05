@@ -3,7 +3,7 @@ import { GAMES, type GameId } from '../data/games';
 import { useArcade } from '../hooks/useArcade';
 import { formatDate, formatScore } from '../lib/canvas';
 import { readScores, readSharedScores, sharedGameDir, type ScoreEntry, type SharedScore } from '../lib/scores';
-import { pollDir } from '../lib/store';
+import { watchDir } from '../lib/store';
 import Icon from './Icon';
 
 interface LeaderboardProps {
@@ -58,7 +58,8 @@ function Leaderboard({ onBack }: LeaderboardProps) {
         if (!cancelled) setRowsLoaded({ key: sharedKey, list });
       });
     void load();
-    const stop = pollDir(sharedGameDir(shared, game), () => void load(), POLL_MS);
+    // R3-901: watched, not polled (the relay covers remote writes).
+    const stop = watchDir(sharedGameDir(shared, game), () => void load());
     return () => {
       cancelled = true;
       stop();
